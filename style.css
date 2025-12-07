@@ -253,3 +253,58 @@ body {
   z-index: 0;
   background: linear-gradient(105deg, #ff95ec 0%, #ff59e2 6%, #ff00d3 19%, red 72%, black 88%);
 }
+
+#start-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000; /* Svart bakgrund för att dölja animationen bakom */
+  z-index: 10000; /* Måste vara högre än allt annat (text-groups har 999) */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.8s ease; /* Snygg transition när den försvinner */
+  cursor: pointer;
+}
+
+#start-overlay.hidden {
+  opacity: 0;
+  pointer-events: none; /* Gör att man kan klicka på animationen bakom sen */
+}
+
+.loader-container {
+  text-align: center;
+  color: white;
+  font-family: sans-serif;
+}
+
+.loader-container p {
+  margin-top: 20px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  animation: pulse 2s infinite;
+}
+
+/* Spinner CSS (Modern Cirkel) */
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ff95ec; /* Matchar din rosa färg i temat */
+  animation: spin 1s ease-in-out infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
