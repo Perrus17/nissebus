@@ -34,7 +34,6 @@ function updateElementSize() {
 function createMasterTimeline() {
   const tl = gsap.timeline({ repeat: -1 });
 
-  // SÄKERHETSÅTGÄRD: Göm alla textgrupper utom intro via JS också
   gsap.set(".text-group", { autoAlpha: 0 });
   gsap.set(".intro-group", { autoAlpha: 1 });
 
@@ -97,8 +96,7 @@ function addTextAnimations(tl) {
     4
   );
   
-  // FIX: Använd ">" så att vi väntar tills exit-animationen (inkl. delay) är helt klar
-  // Innan detta klipptes animationen av för tidigt (vid 5.0)
+
   tl.set(".intro-group", { autoAlpha: 0 }, ">");
 }
 
@@ -113,8 +111,7 @@ function insertRestText(tl, groupIndex, duration) {
   const sub = group.querySelector('.subtitle');
   const listItems = group.querySelectorAll('.list-item'); 
   
-  // SKAPA ETT FAST ANKARE
-  // Detta garanterar att vi alltid räknar från SAMMA startpunkt
+
   const startLabel = `restGroupStart_${groupIndex}`;
   tl.addLabel(startLabel, "<"); 
   
@@ -233,7 +230,6 @@ function insertRestText(tl, groupIndex, duration) {
   tl.set(group, { autoAlpha: 0 }, `${startLabel}+=${duration}`);
 }
 
-// --- PHASE 2: Panel Animations ---
 // --- PHASE 2: Panel Animations ---
 function addPanelAnimations(tl) {
   panels.forEach((panel, i) => {
@@ -537,11 +533,48 @@ function addSecondaryPanelsSegment(tl, panelIndex) {
   });
 }
 
-// --- INIT + RESIZE HANDLING ---
-let tl = createMasterTimeline();
+// --- INITIERING MED START-SKÄRM ---
+// Denna del ersätter den gamla initieringen för att hantera klick-starten
 
-window.addEventListener('resize', () => {
-  updateElementSize();
-  tl.kill();
+let tl; // Deklarera variabeln globalt men tilldela inget än
+let hasStarted = false; // Håll koll på om vi startat
+
+// Hämta overlay
+const startOverlay = document.getElementById('start-overlay');
+
+// Funktion för att dra igång allt
+function startPresentation() {
+  if (hasStarted) return; // Förhindra dubbelklick
+  hasStarted = true;
+
+  // 1. Starta animationen
   tl = createMasterTimeline();
+
+  // 2. Tona ut startskärmen
+  startOverlay.classList.add('hidden');
+  
+  // (Valfritt: Om du vill ta bort elementet helt ur DOM efter toningen)
+  setTimeout(() => {
+    startOverlay.style.display = 'none';
+  }, 1000);
+}
+
+// Lyssna på klick på hela overlayen
+// (Förutsätter att du lagt in <div id="start-overlay">...</div> i din HTML)
+if (startOverlay) {
+  startOverlay.addEventListener('click', startPresentation);
+} else {
+  // Fallback om overlay saknas (t.ex. vid testning utan HTML-ändring)
+  console.warn("Start overlay hittades inte, startar direkt.");
+  tl = createMasterTimeline();
+}
+
+// --- RESIZE HANDLING ---
+// Vi vill bara hantera resize om presentationen faktiskt har börjat
+window.addEventListener('resize', () => {
+  if (hasStarted && tl) {
+    updateElementSize();
+    tl.kill(); // Döda den gamla
+    tl = createMasterTimeline(); // Starta en ny anpassad efter fönstret
+  }
 });
